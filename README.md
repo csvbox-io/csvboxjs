@@ -13,7 +13,7 @@ npm install @csvbox/csvboxjs
 ## Usage
 
 ```jsx
-import CSVBoxImporter from 'csvbox-npm-test';
+import CSVBoxImporter from '@csvbox/csvboxjs';
 
 function callback(result, data) {
     if(result) {
