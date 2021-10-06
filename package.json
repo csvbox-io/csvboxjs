@@ -1,0 +1,35 @@
+{
+  "name": "@csvbox/csvboxjs",
+  "version": "1.0.0",
+  "description": "JS adapter for csvbox.io",
+  "author": "csvbox-io",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/csvbox-io/csvboxjs.git"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "csv",
+    "importer",
+    "uploader",
+    "csvbox",
+    "parser",
+    "csv-parse",
+    "excel",
+    "xls",
+    "csv import",
+    "csv upload",
+    "spreadsheet import",
+    "js csv",
+    "csv parse",
+    "csv to json"
+  ],
+  "bugs": {
+    "url": "https://github.com/csvbox-io/csvboxjs/issues"
+  },
+  "homepage": "https://github.com/csvbox-io/csvboxjs#readme"
+}
