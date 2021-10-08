@@ -24,7 +24,7 @@ function callback(result, data) {
     }
 }
 
-let importer = new CSVBoxImporter("38uZ5obLvII2vyPYqKNjRe4iCJ6fTJ",{}, callback);
+let importer = new CSVBoxImporter("Sheet license key",{}, callback);
 
 importer.setUser({
     user_id: 'default123'
