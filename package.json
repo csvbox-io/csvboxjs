@@ -1,6 +1,6 @@
 {
   "name": "@csvbox/csvboxjs",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "JS adapter for csvbox.io",
   "author": "csvbox-io",
   "license": "MIT",
