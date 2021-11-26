@@ -1,10 +1,13 @@
 class CSVBoxImporter {
             
     constructor(slug, data = {}, callback = null) {
+        
         this.isIframeLoaded = false;
         this.shouldOpenModalonIframeLoad = false;
         this.slug = slug;
         this.data = data;
+        this.columns = [];
+
         if (callback && (typeof callback == "function")) {
             this.callback = callback;
         }
@@ -80,7 +83,21 @@ class CSVBoxImporter {
             iframe.contentWindow.postMessage({
                 "customer" : self.data
             }, "*");
+            iframe.contentWindow.postMessage({
+                "columns" : self.columns
+            }, "*");
         }
+
+        if(document.querySelector("[data-csvbox]") != null){
+            document.onreadystatechange = () => {
+                if (document.readyState === 'complete') {
+                    document.querySelector("[data-csvbox]").disabled = false;
+                }else{
+                    document.querySelector("[data-csvbox]").disabled = true;
+                }
+            };
+        }
+        
     }
 
     setUser(data) {
@@ -142,6 +159,15 @@ class CSVBoxImporter {
             result += characters.charAt(Math.floor(Math.random() * charactersLength));
         }
         return result;
+    }
+
+    setDynamicColumns(columns) {
+        this.columns = columns;
+        if(this.iframe) {
+            this.iframe.contentWindow.postMessage({
+                "columns" : this.columns
+            }, "*");
+        }
     }
 
 }
