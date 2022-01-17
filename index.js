@@ -7,16 +7,14 @@ class CSVBoxImporter {
         this.slug = slug;
         this.data = data;
         this.columns = [];
+        this.options = [];
 
         if (callback && (typeof callback == "function")) {
             this.callback = callback;
         }
         let self= this;
         if(document.readyState === "complete") {
-            console.log("document already laoded")
             self.setUpImporter();
-        }else{
-            console.log("document not laoded")
         }
         document.addEventListener('DOMContentLoaded', function() {
             self.setUpImporter();
@@ -86,6 +84,9 @@ class CSVBoxImporter {
             iframe.contentWindow.postMessage({
                 "columns" : self.columns
             }, "*");
+            iframe.contentWindow.postMessage({
+                "options" : self.options
+            }, "*");
         }
 
         if(document.querySelector("[data-csvbox]") != null){
@@ -113,7 +114,6 @@ class CSVBoxImporter {
         window.addEventListener("message", (event) => {
             if (event.data === "mainModalHidden") {
                 this.holder.style.display = 'none';
-                this.holder.querySelector('iframe').src = this.holder.querySelector('iframe').src;
                 this.isModalShown = false;
             }
             if(event.data === "uploadSuccessful") {
@@ -166,6 +166,15 @@ class CSVBoxImporter {
         if(this.iframe) {
             this.iframe.contentWindow.postMessage({
                 "columns" : this.columns
+            }, "*");
+        }
+    }
+
+    setOptions(options) {
+        this.options = options;
+        if(this.iframe) {
+            this.iframe.contentWindow.postMessage({
+                "options" : this.options
             }, "*");
         }
     }
