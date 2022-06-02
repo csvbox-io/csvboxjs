@@ -153,17 +153,21 @@ class CSVBoxImporter {
                     if(event.data.data.import_status == "success") {
                         // this.callback(true, event.data.data);
                         if(event?.data?.row_data) {
+                            
                             let primary_row_data = event.data.row_data;
                             let headers = event.data.headers;
                             let rows = [];
                             let dynamic_columns_indexes = event.data.dynamicColumnsIndexes;
+                            let dropdown_display_labels_mappings = event.data.dropdown_display_labels_mappings;
+
                             primary_row_data.forEach((row_data) => {
                                 let x = {};
                                 let dynamic_columns = {};
                                 row_data.data.forEach((col, i)=>{
-
                                     if(col == undefined){ col = ""};
-
+                                    if(!!dropdown_display_labels_mappings[i] && !!dropdown_display_labels_mappings[i][col]) {
+                                        col = dropdown_display_labels_mappings[i][col];
+                                    }
                                     if(dynamic_columns_indexes.includes(i)) {
                                         dynamic_columns[headers[i]] = col;
                                     }else{
