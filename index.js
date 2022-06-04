@@ -71,8 +71,7 @@ class CSVBoxImporter {
         let BASE_URL = "https://app.csvbox.io/embed/";
 
         let url = BASE_URL + this.slug;
-        url += `?debug=${!!this.configuration?.debug}`;
-        url += `&source=embedCode`;
+        url += '?source=embedCode';
 
         iframe.setAttribute("src", url);
 
@@ -104,7 +103,7 @@ class CSVBoxImporter {
                 "options" : self.options
             }, "*");
 
-            self.onReady?.();
+            self.onReady && self.onReady();
         }
     }
 
@@ -136,7 +135,7 @@ class CSVBoxImporter {
             if (event.data === "mainModalHidden") {
                 this.holder.style.display = 'none';
                 this.isModalShown = false;
-                this.onClose?.();
+                this.onClose && this.onClose();
             }
             if(event.data === "uploadSuccessful") {
                 if(this.callback && (typeof this.callback == "function")){
@@ -152,7 +151,7 @@ class CSVBoxImporter {
                 if(event.data.type && event.data.type == "data-push-status") {
                     if(event.data.data.import_status == "success") {
                         // this.callback(true, event.data.data);
-                        if(event?.data?.row_data) {
+                        if(event && event.data && event.data.row_data) {
                             
                             let primary_row_data = event.data.row_data;
                             let headers = event.data.headers;
@@ -174,7 +173,7 @@ class CSVBoxImporter {
                                         x[headers[i]] = col;
                                     }
                                 });
-                                if(row_data?.unmapped_data) {
+                                if(rrow_data && row_data.unmapped_data) {
                                     x["_unmapped_data"] = row_data.unmapped_data;
                                 }
                                 if(dynamic_columns && Object.keys(dynamic_columns).length > 0) {
