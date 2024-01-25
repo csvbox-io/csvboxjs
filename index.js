@@ -4,7 +4,7 @@ class CSVBoxImporter {
 
         this.configuration = configuration;
 
-        this.log("Importer initialisation started",new Date());
+        this.log("Importer initialisation started");
 
         this.isIframeLoaded = false;
         this.shouldOpenModalonIframeLoad = false;
@@ -27,16 +27,16 @@ class CSVBoxImporter {
         let self = this;
 
         if(document.readyState === "complete") {
-            self.log("document readyState is complete",new Date());
+            self.log("document readyState is complete");
             if(!self.configuration.lazy) {
                 self.setUpImporter();
             }
         }
 
-        this.log("Setting up DOMContentLoaded event listener " + document.readyState,new Date());
+        this.log("Setting up DOMContentLoaded event listener " + document.readyState);
 
         document.addEventListener('DOMContentLoaded', function() {
-            self.log("Event: DOMContentLoaded",new Date());
+            self.log("Event: DOMContentLoaded");
             if(!self.configuration.lazy) {
                 self.setUpImporter();
             }
@@ -46,7 +46,7 @@ class CSVBoxImporter {
             this.setUpImporter();
         }
 
-        this.log("Importer initialisation done",new Date());
+        this.log("Importer initialisation done");
         
     }
 
@@ -54,7 +54,7 @@ class CSVBoxImporter {
 
         try {
 
-            this.log("Called setUpImporter();",new Date());
+            this.log("Called setUpImporter();");
 
             this.isModalShown = false;
             this.isIframeLoaded = false;
@@ -121,7 +121,7 @@ class CSVBoxImporter {
                 url += `&language=${this.options.language}`;
             }
 
-            this.log("Loading url " + url,new Date());
+            this.log("Loading url " + url);
 
             iframe.setAttribute("src", url);
 
@@ -152,12 +152,14 @@ class CSVBoxImporter {
 
                 self.onReady?.();
 
-                self.log("iframe is ready.",new Date());
+                self.log("iframe is ready.");
 
             }
 
+            // this.isImporterInitialised = true;
         } catch(err) {
-            this.log("Importer initialisation error " + err,new Date());
+            this.log("Importer initialisation error " + err);
+            // this.isImporterInitialised = false;
         }
     }
 
@@ -168,11 +170,11 @@ class CSVBoxImporter {
 
         if(oldComponent) {
             
-            this.log("Old csvbox component present on page",new Date());
+            this.log("Old csvbox component present on page");
 
             let iframe = oldComponent.firstChild;
             if(iframe.getAttribute("data-csvbox-slug") !== this.slug) {
-                this.log("Slug has been changed, csvbox component refresh is required",new Date());
+                this.log("Slug has been changed, csvbox component refresh is required");
                 oldComponent.remove();
                 this.initImporter();
             }
@@ -311,7 +313,7 @@ class CSVBoxImporter {
             }
         }, false);
 
-        this.log("Message listener initialised.",new Date());
+        this.log("Message listener initialised.");
 
     }
 
@@ -327,7 +329,7 @@ class CSVBoxImporter {
             }
         } else {
             this.shouldOpenModalonIframeLoad = true;
-            this.log("iframe not loaded yet. Modal will open once iframe is loaded",new Date());
+            this.log("iframe not loaded yet. Modal will open once iframe is loaded");
         }
     }
 
@@ -361,7 +363,7 @@ class CSVBoxImporter {
 
     log(message) {
         if(!!this.configuration.debug || (sessionStorage && sessionStorage.getItem('CSVBOX_DEBUG_FLAG') == "true" )) {
-            console.log("[CSVBox]", message,new Date());    
+            console.log("[CSVBox]", message);    
         }
     }
 
