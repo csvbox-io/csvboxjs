@@ -54,8 +54,6 @@ class CSVBoxImporter {
 
         try {
 
-            this.onLoadStart?.();
-
             this.log("Called setUpImporter();",new Date());
 
             this.isModalShown = false;
@@ -206,9 +204,6 @@ class CSVBoxImporter {
                     break;
                 case "onSubmit":
                     this.onSubmit = callback;
-                    break;
-                case "onLoadStart":
-                    this.onLoadStart = callback;
                     break;
             }
         }
