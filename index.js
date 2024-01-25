@@ -2,15 +2,23 @@ class CSVBoxImporter {
 
     constructor(slug, data = {}, callback = null, configuration = {}) {
 
+        this.configuration = configuration;
+
+        this.log("Importer initialisation started");
+
         this.isIframeLoaded = false;
         this.shouldOpenModalonIframeLoad = false;
         this.slug = slug;
         this.data = data;
 
+        this.key = this.randomString();
+
         this.columns = [];
         this.options = [];
 
-        this.configuration = configuration;
+        if(!!this.configuration.data_location) {
+            this.data_location = this.configuration.data_location;
+        }
 
         if (callback && (typeof callback == "function")) {
             this.callback = callback;
@@ -19,92 +27,163 @@ class CSVBoxImporter {
         let self = this;
 
         if(document.readyState === "complete") {
-            self.setUpImporter();
+            self.log("document readyState is complete");
+            if(!self.configuration.lazy) {
+                self.setUpImporter();
+            }
         }
 
+        this.log("Setting up DOMContentLoaded event listener " + document.readyState);
+
         document.addEventListener('DOMContentLoaded', function() {
-            self.setUpImporter();
+            self.log("Event: DOMContentLoaded");
+            if(!self.configuration.lazy) {
+                self.setUpImporter();
+            }
         });
+
+        if(!this.configuration.lazy) {
+            this.setUpImporter();
+        }
+
+        this.log("Importer initialisation done");
+        
     }
+
+    initImporter() {
+
+        try {
+
+            this.log("Called setUpImporter();");
+
+            this.isModalShown = false;
+            this.isIframeLoaded = false;
+
+            this.setupMessageListener();
+
+            let cssText = "" +
+                ".csvbox-component {" +
+                    "position: fixed;" +
+                    "top: 0;" +
+                    "bottom: 0;" +
+                    "left: 0;" +
+                    "right: 0;" +
+                    "z-index:2147483647;" +
+                "}" +
+                ".csvbox-component iframe{" +
+                    "height: 100%;" +
+                    "width: 100%;" +
+                    "position: absolute;" +
+                "}";
+
+            let css = document.createElement("style");
+            css.type = "text/css";
+            if ("textContent" in css)
+                css.textContent = cssText;
+            else
+                css.innerText = cssText;
+            document.body.appendChild(css);
+
+            this.id = "csvbox-embed-" + this.key;
+            this.holder = document.createElement("div");
+            this.holder.classList.add('csvbox-component');
+            this.holder.style.display = "none";
+
+            let iframe = document.createElement("iframe");
+            this.iframe = iframe;
+
+            let domain = "app.csvbox.io";
+
+            if(!!this.configuration.customDomain) {
+                domain = this.configuration.customDomain;
+            }
+
+            let BASE_URL = `https://${domain}/embed/`;
+
+            if(this.data_location) {
+                BASE_URL = `https://${this.data_location}-${domain}/embed/`;
+            }
+
+            let url = BASE_URL + this.slug;
+            url += `?debug=${!!this.configuration?.debug}`;
+            url += `&source=embedCode`;
+            url += `&library-version=${ this.configuration?.libraryVersion ? this.configuration?.libraryVersion : '1.1.0'}`;
+
+            if(this.configuration?.framework) {
+                url += `&framework=${this.configuration.framework}`;
+            }
+
+            if(this.data_location) {
+                url += `&preventRedirect`;
+            }
+
+            if(this.options.language) {
+                url += `&language=${this.options.language}`;
+            }
+
+            this.log("Loading url " + url);
+
+            iframe.setAttribute("src", url);
+
+            iframe.setAttribute("data-csvbox-slug", this.slug);            
+
+            iframe.frameBorder = 0;
+            this.holder.id = this.id;
+            this.holder.appendChild(iframe);
+            document.body.appendChild(this.holder);
+
+            let self = this;
+
+            iframe.onload = function () {
+
+                self.isIframeLoaded = true;
+
+                if(self.shouldOpenModalonIframeLoad) {
+                    self.shouldOpenModalonIframeLoad = false;
+                    self.openModal();
+                }
+
+                iframe.contentWindow.postMessage({
+                    "customer" : self.data,
+                    "columns" : self.columns,
+                    "options" : self.options,
+                    "unique_token": self.key
+                }, "*");
+
+                self.onReady?.();
+
+                self.log("iframe is ready.");
+
+            }
+
+            // this.isImporterInitialised = true;
+        } catch(err) {
+            this.log("Importer initialisation error " + err);
+            // this.isImporterInitialised = false;
+        }
+    }
+
 
     setUpImporter() {
 
-        this.isModalShown = false;
+        let oldComponent = document.getElementById("csvbox-embed-" + this.key);
 
-        document.addEventListener('DOMContentLoaded', function() {
-            setUpImporter();
-        });
+        if(oldComponent) {
+            
+            this.log("Old csvbox component present on page");
 
-        this.setupMessageListener();
-
-        let cssText = "" +
-            ".csvbox-component {" +
-                "position: fixed;" +
-                "top: 0;" +
-                "bottom: 0;" +
-                "left: 0;" +
-                "right: 0;" +
-                "z-index:2147483647;" +
-            "}" +
-            ".csvbox-component iframe{" +
-                "height: 100%;" +
-                "width: 100%;" +
-                "position: absolute;" +
-            "}";
-
-        let css = document.createElement("style");
-        css.type = "text/css";
-        if ("textContent" in css)
-            css.textContent = cssText;
-        else
-            css.innerText = cssText;
-        document.body.appendChild(css);
-
-        this.id = "csvbox-embed-" + this.randomString();
-        this.holder = document.createElement("div");
-        this.holder.classList.add('csvbox-component');
-        this.holder.style.display = "none";
-
-        let iframe = document.createElement("iframe");
-        this.iframe = iframe;
-
-        let BASE_URL = "https://app.csvbox.io/embed/";
-
-        let url = BASE_URL + this.slug;
-        url += '?source=embedCode';
-
-        iframe.setAttribute("src", url);
-
-        iframe.frameBorder = 0;
-        this.holder.id = this.id;
-        this.holder.appendChild(iframe);
-        document.body.appendChild(this.holder);
-
-        let self = this;
-
-        iframe.onload = function () {
-
-            self.isIframeLoaded = true;
-
-            if(self.shouldOpenModalonIframeLoad) {
-                self.shouldOpenModalonIframeLoad = false;
-                self.openModal();
+            let iframe = oldComponent.firstChild;
+            if(iframe.getAttribute("data-csvbox-slug") !== this.slug) {
+                this.log("Slug has been changed, csvbox component refresh is required");
+                oldComponent.remove();
+                this.initImporter();
             }
-
-            iframe.contentWindow.postMessage({
-                "customer" : self.data
-            }, "*");
-
-            iframe.contentWindow.postMessage({
-                "columns" : self.columns
-            }, "*");
-
-            iframe.contentWindow.postMessage({
-                "options" : self.options
-            }, "*");
-
-            self.onReady && self.onReady();
+            
+        }else{
+            this.initImporter();
         }
+
+        
     }
 
     setUser(data) {
@@ -125,17 +204,21 @@ class CSVBoxImporter {
                 case "onClose":
                     this.onClose = callback;
                     break;
+                case "onSubmit":
+                    this.onSubmit = callback;
+                    break;
             }
         }
     }
 
     setupMessageListener() {
+        
         window.addEventListener("message", (event) => {
 
             if (event.data === "mainModalHidden") {
                 this.holder.style.display = 'none';
                 this.isModalShown = false;
-                this.onClose && this.onClose();
+                this.onClose?.();
             }
             if(event.data === "uploadSuccessful") {
                 if(this.callback && (typeof this.callback == "function")){
@@ -148,41 +231,62 @@ class CSVBoxImporter {
                 }
             }
             if(typeof event.data == "object") {
-                if(event.data.type && event.data.type == "data-push-status") {
+                if(event?.data?.data?.unique_token == this.key) {
+                if(event.data.type && event.data.type == "data-on-submit") {
+                    let metadata = event.data.data;
+                    metadata["column_mappings"] = event.data.column_mapping;
+                    metadata["ignored_columns"] = event.data.ignored_column_row;
+                    delete metadata["unique_token"];
+                    this.onSubmit?.(metadata);
+                }
+                else if(event.data.type && event.data.type == "data-push-status") {
                     if(event.data.data.import_status == "success") {
-                        // this.callback(true, event.data.data);
-                        if(event && event.data && event.data.row_data) {
+                        
+                        if(event?.data?.row_data) {
                             
                             let primary_row_data = event.data.row_data;
                             let headers = event.data.headers;
                             let rows = [];
                             let dynamic_columns_indexes = event.data.dynamicColumnsIndexes;
-                            let dropdown_display_labels_mappings = event.data.dropdown_display_labels_mappings;
+                            let virtual_columns_indexes = event.data.virtualColumnsIndexes || [];
 
                             primary_row_data.forEach((row_data) => {
+                                
                                 let x = {};
                                 let dynamic_columns = {};
+                                let virtual_data = {};
+
                                 row_data.data.forEach((col, i)=>{
                                     if(col == undefined){ col = ""};
-                                    if(!!dropdown_display_labels_mappings[i] && !!dropdown_display_labels_mappings[i][col]) {
-                                        col = dropdown_display_labels_mappings[i][col];
-                                    }
                                     if(dynamic_columns_indexes.includes(i)) {
                                         dynamic_columns[headers[i]] = col;
-                                    }else{
+                                    }
+                                    else if(virtual_columns_indexes.includes(i)) {
+                                        virtual_data[headers[i]] = col;
+                                    }
+                                    else{
                                         x[headers[i]] = col;
                                     }
                                 });
-                                if(rrow_data && row_data.unmapped_data) {
+
+                                if(row_data?.unmapped_data) {
                                     x["_unmapped_data"] = row_data.unmapped_data;
                                 }
                                 if(dynamic_columns && Object.keys(dynamic_columns).length > 0) {
                                     x["_dynamic_data"] = dynamic_columns;
                                 }
+                                if(virtual_data && Object.keys(virtual_data).length > 0) {
+                                    x["_virtual_data"] = virtual_data;
+                                }
+                                
                                 rows.push(x);
+
                             });
                             let metadata = event.data.data;
                             metadata["rows"] = rows;
+                            metadata["column_mappings"] = event.data.column_mapping;
+                            metadata["raw_columns"] = event.data.raw_columns;
+                            metadata["ignored_columns"] = event.data.ignored_column_row;
                             delete metadata["unique_token"];
                             this.callback(true, metadata);
                         }else{
@@ -194,23 +298,39 @@ class CSVBoxImporter {
                         let metadata = event.data.data;
                         delete metadata["unique_token"];
                         this.callback(false, metadata);
+                        }
+                        
+                    }else if (event.data.type && event.data.type == "csvbox-upload-failed") {
+                        this.callback(false);
+                    }else if(event.data.type && event.data.type == "csvbox-modal-hidden") {
+                        this.holder.style.display = 'none';
+                        this.isModalShown = false;
+                        this.onClose?.();
                     }
+                        
                 }
+
             }
         }, false);
+
+        this.log("Message listener initialised.");
+
     }
 
     openModal() {
+        if(!!this.configuration.lazy) {
+            this.setUpImporter();
+        }
         if(this.isIframeLoaded) {
             if(!this.isModalShown) {
                 this.isModalShown = true;
                 this.holder.querySelector('iframe').contentWindow.postMessage('openModal', '*');
                 this.holder.style.display = 'block';
             }
-        }else{
+        } else {
             this.shouldOpenModalonIframeLoad = true;
+            this.log("iframe not loaded yet. Modal will open once iframe is loaded");
         }
-
     }
 
     randomString() {
@@ -238,6 +358,12 @@ class CSVBoxImporter {
             this.iframe.contentWindow.postMessage({
                 "options" : this.options
             }, "*");
+        }
+    }
+
+    log(message) {
+        if(!!this.configuration.debug || (sessionStorage && sessionStorage.getItem('CSVBOX_DEBUG_FLAG') == "true" )) {
+            console.log("[CSVBox]", message);    
         }
     }
 
