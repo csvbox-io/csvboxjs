@@ -123,6 +123,13 @@ class CSVBoxImporter {
                 url += `&language=${this.options.language}`;
             }
 
+            if(this.configuration?.environment) {
+                let environment = JSON.stringify(this.configuration.environment).replace(/['"]/g, function(match) {
+                    return '\\' + match;
+                });
+                url += `&env=${environment}`;
+            }
+
             this.log("Loading url " + url);
 
             iframe.setAttribute("src", url);
