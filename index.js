@@ -391,4 +391,13 @@ if(document.querySelector("[data-csvbox]") != null){
     };
 }
 
+let csvboxElements = document.querySelectorAll("[data-csvbox]");
+if(csvboxElements.length > 0){
+    window.addEventListener('load', () => {
+        csvboxElements.forEach(element => {
+            element.disabled = false;
+        });
+    });
+}
+
 export default CSVBoxImporter;
