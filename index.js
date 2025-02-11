@@ -381,16 +381,6 @@ class CSVBoxImporter {
 
 }
 
-if(document.querySelector("[data-csvbox]") != null){
-    document.onreadystatechange = () => {
-        if (document.readyState === 'complete') {
-            document.querySelector("[data-csvbox]").disabled = false;
-        }else{
-            document.querySelector("[data-csvbox]").disabled = true;
-        }
-    };
-}
-
 let csvboxElements = document.querySelectorAll("[data-csvbox]");
 if(csvboxElements.length > 0){
     window.addEventListener('load', () => {
