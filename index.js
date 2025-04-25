@@ -80,6 +80,11 @@ class CSVBoxImporter {
 
             let css = document.createElement("style");
             css.type = "text/css";
+
+            if (!!this.configuration.nonce) {
+                css.nonce = this.configuration.nonce;
+            }
+
             if ("textContent" in css)
                 css.textContent = cssText;
             else
