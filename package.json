@@ -1,6 +1,6 @@
 {
   "name": "@csvbox/csvboxjs",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "JS adapter for csvbox.io",
   "author": "csvbox-io",
   "license": "MIT",
@@ -8,9 +8,18 @@
     "type": "git",
     "url": "git+https://github.com/csvbox-io/csvboxjs.git"
   },
-  "main": "index.js",
+  "main": "dist/csvbox.cjs.js",
+  "module": "dist/csvbox.es.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/csvbox.es.js",
+      "require": "./dist/csvbox.cjs.js"
+    }
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "vite build"
   },
   "keywords": [
     "csv",
@@ -31,5 +40,10 @@
   "bugs": {
     "url": "https://github.com/csvbox-io/csvboxjs/issues"
   },
-  "homepage": "https://github.com/csvbox-io/csvboxjs#readme"
+  "homepage": "https://github.com/csvbox-io/csvboxjs#readme",
+  "dependencies": {
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vite-plugin-dts": "^4.5.4"
+  }
 }
